@@ -1,15 +1,20 @@
 # To run this requests use the extension for VSCODE named: REST Client
 # VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
 
+# The acess token is generated on login
+# Configure settings.json for .vscode
+
+
 ### Return the hotels in json
 GET http://localhost:5000/hotels
 
 ### Return the hotel by id (bravo)
-GET http://localhost:5000/hotels/bravo
+GET {{host}}/hotels/bravo
 
-### Create the hotel (delta)
-POST http://localhost:5000/hotels/delta
+### Create the hotel (delta) acess_token required
+POST {{host}}/hotels/delta
 content-type: application/json
+Authorization: Bearer {{token}}
 
 {
     "name": "Delta Hotel",
@@ -19,9 +24,10 @@ content-type: application/json
 }
 ###
 
-### Update hotel (bravo)
-PUT http://localhost:5000/hotels/bravo
+### Update hotel (bravo) acess_token required
+PUT {{host}}/hotels/bravo
 content-type: application/json
+Authorization: Bearer {{token}}
 
 {
     "name": "Bravo ALTERADO Hotel",
@@ -32,9 +38,10 @@ content-type: application/json
 ###
 
 
-### Create hotel with HTTP method PUT (if not exists)
-PUT http://localhost:5000/hotels/echo
+### Create hotel with HTTP method PUT (if not exists) acess_token required 
+PUT {{host}}/hotels/echo
 content-type: application/json
+Authorization: Bearer {{token}}
 
 {
     "name": "Echo Hotel",
@@ -44,5 +51,6 @@ content-type: application/json
 }
 ###
 
-### Delete hotel by hotel_id
-DELETE http://localhost:5000/hotels/echo
+### Delete hotel by hotel_id acess_token required
+DELETE {{host}}/hotels/echo
+Authorization: Bearer {{token}}
