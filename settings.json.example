@@ -1,0 +1,14 @@
+// This file must be inside the folder .vscode
+
+{
+    "rest-client.environmentVariables": {
+        "local": {
+            "host": "http://example:5000/",
+            "token": "token_here"
+        },
+        "production": {
+            "host": "example.com",
+            "token": "{{$shared prodToken}}"
+        }
+    }
+}

@@ -1,0 +1,38 @@
+# To run this requests use the extension for VSCODE named: REST Client
+# VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+# Configure settings.json for .vscode
+
+### Return user by id
+GET {{host}}/user/1
+
+### Delete user by id
+DELETE {{host}}/user/2
+
+### Login and generated the acess token
+POST {{host}}/login
+Content-Type: application/json
+
+{
+    "login": "admin",
+    "password": "123"
+}
+
+###
+
+### Logout
+POST {{host}}/logout
+Authorization: Bearer {{token}}
+
+###
+
+### Register
+POST {{host}}/register
+Content-Type: application/json
+
+{
+    "login": "admin",
+    "password": "123"
+}
+
+###
