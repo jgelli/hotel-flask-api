@@ -3,7 +3,7 @@ from models.hotel import HotelModel
 from flask_jwt_extended import jwt_required
 import sqlite3
 
-def normalize_path_params(city = None,
+def normalize_query_params(city = None,
                           min_stars = 0,
                           max_stars = 5,
                           min_rate = 0,
@@ -30,52 +30,40 @@ def normalize_path_params(city = None,
             'offset': offset
             }
 
-#path /hotels?city=washington&min_stars=4
-path_params = reqparse.RequestParser()
-path_params.add_argument('city', type=str)
-path_params.add_argument('min_stars', type=float)
-path_params.add_argument('max_stars', type=float)
-path_params.add_argument('min_rate', type=float)
-path_params.add_argument('max_rate', type=float)
-path_params.add_argument('limit', type=float)
-path_params.add_argument('offset', type=float)
+
 
 
 class Hotels(Resource):
+    query_params = reqparse.RequestParser()
+    query_params.add_argument('city', type=str, location='args')
+    query_params.add_argument('min_stars', type=float, location='args')
+    query_params.add_argument('max_stars', type=float, location='args')
+    query_params.add_argument('min_rate', type=float, location='args')
+    query_params.add_argument('max_rate', type=float, location='args')
+    query_params.add_argument('limit', type=float, location='args')
+    query_params.add_argument('offset', type=float, location='args')
+
     def get(self):
-        connection = sqlite3.connect('database.db')
-        cursor = connection.cursor()
+        filters = Hotels.query_params.parse_args()
 
-        data = path_params.parse_args()
-        valid_data = {key:data[key] for key in data if data[key] is not None}
-        parameters = normalize_path_params(**valid_data)
+        query = HotelModel.query
 
-        if not parameters.get('city'):
-            query = "SELECT * FROM hotels \
-                     WHERE (stars > ? AND stars < ?) \
-                     AND (rate > ? AND rate < ?) \
-                     LIMIT ? OFFSET ?"
-            tuple_parameters = tuple([parameters[key] for key in parameters])
-            result = cursor.execute(query, tuple_parameters) #"SELECT * FROM hotels WHERE (stars > min_stars AND stars < max_stars) AND (rate > ? min_rate AND rate < max_rate) LIMIT limit OFFSET offset"
-        else:
-            query = "SELECT * FROM hotels \
-                     WHERE (stars >= ? AND stars <= ?) \
-                     AND (rate >= ? AND rate <= ?) \
-                     AND city = ? LIMIT ? OFFSET ?"
-            tuple_parameters = tuple([parameters[key] for key in parameters])
-            result = cursor.execute(query, tuple_parameters) #"SELECT * FROM hotels WHERE (stars > min_stars AND stars < max_stars) AND (rate > ? min_rate AND rate < max_rate) AND city = city LIMIT limit OFFSET offset"
+        if filters['city']:
+            query = query.filter(HotelModel.city.ilike('%' + filters['city'] + '%'))
+        if filters['min_stars']:
+            query = query.filter(HotelModel.stars >= filters['min_stars'])
+        if filters['max_stars']:
+            query = query.filter(HotelModel.star <= filters['max_stars'])
+        if filters['min_rate']:
+            query = query.filter(HotelModel.rate >= filters['min_rate'])
+        if filters['max_rate']:
+            query = query.filter(HotelModel.rate <= filters['max_rate'])
+        if filters['limit']:
+            query = query.limit(filters['limit'])
+        if filters['offset']:
+            query = query.offset(filters['offset'])
 
-        hotels = []
-        for line in result:
-            hotels.append({
-                'hotel_id': line[0], # self.hotel_id
-                'name': line[1], # self.name
-                'stars': line[2], # self.stars
-                'rate': line[3], # self.rate
-                'city': line[4] # self.city
-            })
-
-        return {'hotels': hotels}
+        return {'hotels': [hotel.json() for hotel in query]}
 
 class Hotel(Resource):
     arguments = reqparse.RequestParser()
