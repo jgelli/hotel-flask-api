@@ -2,14 +2,18 @@ from flask import Flask, jsonify
 from flask_restful import Api
 
 from resources.hotel import Hotels, Hotel
-from resources.user import User, UserRegister, UserLogin, UserLogout 
+from resources.user import User, UserRegister, UserLogin, UserLogout, UserConfirm
 from flask_jwt_extended import JWTManager
 
 from blocklist import BLOCKLIST
 
 from settings import JWT_SECRET_KEY
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+    return app
+    
+app = create_app()
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
@@ -38,6 +42,7 @@ api.add_resource(User, '/user/<int:user_id>')
 api.add_resource(UserRegister, '/register')
 api.add_resource(UserLogin, '/login')
 api.add_resource(UserLogout, '/logout')
+api.add_resource(UserConfirm, '/confirm/<int:user_id>')
 
 if __name__ == '__main__':
     from sql_alchemy import database

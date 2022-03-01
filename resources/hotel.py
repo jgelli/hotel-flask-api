@@ -1,37 +1,6 @@
 from flask_restful import Resource, reqparse
 from models.hotel import HotelModel
 from flask_jwt_extended import jwt_required
-import sqlite3
-
-def normalize_query_params(city = None,
-                          min_stars = 0,
-                          max_stars = 5,
-                          min_rate = 0,
-                          max_rate = 10000,
-                          limit = 50,
-                          offset = 0, 
-                          **data):
-    if city:
-        return {
-            'min_stars': min_stars,
-            'max_stars': max_stars,
-            'min_rate': min_rate,
-            'max_rate': max_rate,
-            'city': city,
-            'limit': limit,
-            'offset': offset
-            }
-    return {
-            'min_stars': min_stars,
-            'max_stars': max_stars,
-            'min_rate': min_rate,
-            'max_rate': max_rate,
-            'limit': limit,
-            'offset': offset
-            }
-
-
-
 
 class Hotels(Resource):
     query_params = reqparse.RequestParser()
