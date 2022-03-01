@@ -1,18 +1,44 @@
 from flask_restful import Resource, reqparse
-
 from models.hotel import HotelModel
-
 from flask_jwt_extended import jwt_required
 
 class Hotels(Resource):
+    query_params = reqparse.RequestParser()
+    query_params.add_argument('city', type=str, location='args')
+    query_params.add_argument('min_stars', type=float, location='args')
+    query_params.add_argument('max_stars', type=float, location='args')
+    query_params.add_argument('min_rate', type=float, location='args')
+    query_params.add_argument('max_rate', type=float, location='args')
+    query_params.add_argument('limit', type=float, location='args')
+    query_params.add_argument('offset', type=float, location='args')
+
     def get(self):
-        return {'hotels': [hotel.json() for hotel in HotelModel.query.all()]}
+        filters = Hotels.query_params.parse_args()
+
+        query = HotelModel.query
+
+        if filters['city']:
+            query = query.filter(HotelModel.city.ilike('%' + filters['city'] + '%'))
+        if filters['min_stars']:
+            query = query.filter(HotelModel.stars >= filters['min_stars'])
+        if filters['max_stars']:
+            query = query.filter(HotelModel.star <= filters['max_stars'])
+        if filters['min_rate']:
+            query = query.filter(HotelModel.rate >= filters['min_rate'])
+        if filters['max_rate']:
+            query = query.filter(HotelModel.rate <= filters['max_rate'])
+        if filters['limit']:
+            query = query.limit(filters['limit'])
+        if filters['offset']:
+            query = query.offset(filters['offset'])
+
+        return {'hotels': [hotel.json() for hotel in query]}
 
 class Hotel(Resource):
     arguments = reqparse.RequestParser()
     arguments.add_argument('name', type=str, required=True, help="The field 'name' cannot be left blank.")
     arguments.add_argument('stars', type=float, required=True, help="The field 'stars' cannot be left blank.")
-    arguments.add_argument('diary', type=float, required=True, help="The field 'diary' cannot be left blank.")
+    arguments.add_argument('rate', type=float, required=True, help="The field 'rate' cannot be left blank.")
     arguments.add_argument('city', type=str, required=True, help="The field 'city' cannot be left blank.")
     
     def get(self, hotel_id):
